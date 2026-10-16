@@ -20,11 +20,13 @@ type Must struct {
 }
 
 func (m Must) Do[T any](v T, err error) T {
-	NoError(m, err)
-	if closer, ok := any(v).(io.Closer); ok {
-		m.Cleanup(func () {
-			NoError(m, closer.Close())
-		})
-	}
+	NoError(m.TB, err)
+	return v
+}
+
+func (m Must) Close[T io.Closer](v T) T {
+	m.TB.Cleanup(func() {
+		NoError(m.TB, v.Close())
+	})
 	return v
 }
